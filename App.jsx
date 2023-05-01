@@ -2,8 +2,8 @@ import React from "react"
 import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import Split from "react-split"
-import { addDoc, onSnapshot } from "firebase/firestore"
-import { notesCollection } from "./firebase"
+import { addDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore"
+import { notesCollection, db } from "./firebase"
 
 
 
@@ -29,12 +29,12 @@ export default function App() {
       return unsubscribe
     }, [])
 
-    function createNewNote() {
+    async function createNewNote() {
         const newNote = {
             body: "# Type your markdown note's title here"
         }
-        addDoc(notes)
-        setCurrentNoteId(newNote.id)
+     const newNoteRef = await addDoc(notesCollection, newNote)
+        setCurrentNoteId(newNoteRef.id)
     }
 
     function updateNote(text) {
@@ -53,9 +53,9 @@ export default function App() {
         })
     }
 
-    function deleteNote(event, noteId) {
-        event.stopPropagation()
-        setNotes(oldNotes => oldNotes.filter(note => note.id !== noteId))
+   async function deleteNote(noteId) {
+   const docRef = doc(db, "notes", noteId)
+   await deleteDoc(docRef)
     }
 
     return (
